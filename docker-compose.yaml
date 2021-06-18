@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  frontend:
+    build: .
+    ports:
+      - 8000:80
+    volumes:
+      - data:/var/www/html/nfsen-ng/backend/datasources/data
+      - nfdump:/var/nfdump/profiles-data/live/router
+      - ./settings.php:/var/www/html/backend/settings/settings.php
+
+  backend:
+    build: .
+    command: php backend/listen.php
+    environment:
+      - TERM=xterm
+    volumes:
+      - data:/var/www/html/nfsen-ng/backend/datasources/data
+      - nfdump:/var/nfdump/profiles-data/live/router
+      - ./settings.php:/var/www/html/backend/settings/settings.php
+
+  nfcapd:
+    build: .
+    ports:
+      - 9995:9995/udp
+    command: nfcapd -w -p 9995 -B 200000 -S 1 -z -I router -T all -l /var/nfdump/profiles-data/live/router
+    volumes:
+      - nfdump:/var/nfdump/profiles-data/live/router
+
+volumes:
+  data: {}
+  nfdump: {}
